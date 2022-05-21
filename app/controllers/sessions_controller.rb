@@ -3,14 +3,19 @@ class SessionsController < ApplicationController
     @user = User.find_by(email: session_params[:email].downcase)
     if @user && @user.authenticate(session_params[:password])
       sign_in
+      render json: { message: 'User logged in.', user_id: @user.id }, status: :ok
     else
-      render
+      render json: { message: 'Wrong email or password.' }, status: :unauthorized
     end
   end
 
   def destroy
-    sign_out
-    render json: { message: 'Signed out!' }, status: :ok
+    if @user
+      sign_out
+      render json: { message: 'User logged out.' }, status: :ok
+    else
+      render json: { message: 'No user is logged in.' }, status: :not_modified
+    end
   end
 
   private def session_params
