@@ -65,6 +65,9 @@ class TasksController < ApplicationController
   def destroy
     @task = Task.find(params[:id])
     @task.destroy
+    render json: { message: "Task ##{params[:id]} destroyed." }, status: :ok
+  rescue ActiveRecord::RecordNotFound
+    render json: { error: "Task ##{params[:id]} not found" }, status: :not_found
   end
 
   private

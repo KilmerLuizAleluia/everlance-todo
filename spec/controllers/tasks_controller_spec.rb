@@ -45,7 +45,7 @@ describe TasksController, type: :controller do
   describe 'PUT #update' do
     subject { put(:update, params: params, format: :json) }
 
-    let!(:task) { create(:task) }
+    let(:task) { create(:task) }
     let(:user) { create(:user) }
     let(:params) do
       {
@@ -80,13 +80,40 @@ describe TasksController, type: :controller do
     end
   end
 
-  describe '#delete' do
-    context 'when user is logged in' do
+  describe 'DELETE #delete' do
+    subject { delete(:destroy, { id: task_id }) }
+    let!(:task) { create(:task) }
+    let(:task_id) { task.id }
 
+    context 'when user is logged in' do
+      let(:user) { create(:user) }
+
+      context 'trying to delete existing task' do
+        it 'shoudl delete' do
+          session[:user_id] = user.id
+          expect { subject }.to change { Task.count } .by(-1)
+          expect(response).to have_http_status(:ok)
+          expect(result['message']).to eq("Task ##{task_id} destroyed.")
+        end
+      end
+
+      context 'trying to delete unexisting task' do
+        let!(:task_id) { 50000 }
+
+        it 'shoudl return not_found' do
+          session[:user_id] = user.id
+          expect { subject }.to change { Task.count } .by(0)
+          expect(response).to have_http_status(:not_found)
+          expect(result['error']).to eq("Task ##{task_id} not found")
+        end
+      end
     end
 
     context 'when user is not logged in' do
-
+      it 'should return unauthorized' do
+        subject
+        expect(response).to have_http_status(:unauthorized)
+      end
     end
   end
 end
