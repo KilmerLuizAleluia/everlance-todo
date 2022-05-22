@@ -1,24 +1,13 @@
 # README
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+This is Everlance Ruby on Rails Challenge. 
+To test this, you can run your server (`rails server`) and make calls from a tool Postman or Insomnia. Rspec tests also help to understand and test code. 
+All described user stories were fully implemented. 
 
-Things you may want to cover:
 
-* Ruby version
 
-* System dependencies
-
-* Configuration
-
-* Database creation
-
-* Database initialization
-
-* How to run the test suite
-
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
+## TODO
+* Add rubocop;
+* Add pagination on task index;
+* Add password confirmation;
+* Separate spec from controllers to service specs;
