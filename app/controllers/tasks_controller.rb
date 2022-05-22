@@ -55,10 +55,10 @@ class TasksController < ApplicationController
   def update
     @task = Task.find(params[:id])
 
-    if @task.update(params[:task])
-      render json: {"title": @task.title, "completed": @task.completed}
+    if @task.update(task_params)
+      render json: @task, status: :ok
     else
-      render json: @task.errors
+      render json: @task.errors, status: :unprocessable_entity
     end
   end
 

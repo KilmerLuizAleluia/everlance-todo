@@ -18,7 +18,6 @@ describe SessionsController, type: :controller do
 
       it 'should find user and sign in' do
         subject
-        byebug
         expect(response).to have_http_status(:success)
         expect(result['message']).to eq('User logged in.')
         expect(result['user_id']).to eq(user.id)
