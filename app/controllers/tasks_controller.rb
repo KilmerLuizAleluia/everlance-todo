@@ -16,7 +16,7 @@ class TasksController < ApplicationController
 
   def show
     @task = Task.find(params[:id])
-    render json: {"title": @task.title, "completed": @task.completed}
+    render json: @task, status: :ok
   end
 
   def create

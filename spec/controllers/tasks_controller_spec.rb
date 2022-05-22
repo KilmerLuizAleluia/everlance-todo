@@ -232,4 +232,28 @@ describe TasksController, type: :controller do
       end
     end
   end
+
+  describe 'GET #show' do
+    subject { get(:show, { id: task.id }) }
+    let(:task) { create(:task, title: 'First Title', completed: true, notes: ['note1', 'note2']) }
+    let(:user) { create(:user) }
+
+    context 'when user not logged in' do
+      it 'should return task data' do
+        session[:user_id] = user.id
+        subject
+        expect(response).to have_http_status(:ok)
+        expect(result['title']).to eq('First Title')
+        expect(result['completed']).to eq(true)
+        expect(result['notes']).to eq(['note1', 'note2'])
+      end
+    end
+
+    context 'when user is not logged in' do
+      it 'should return unauthorized' do
+        subject
+        expect(response).to have_http_status(:unauthorized)
+      end
+    end
+  end
 end
