@@ -2,49 +2,32 @@ class TasksController < ApplicationController
   before_action :authorize
 
   def index
-    case params[:filter]
-    when 'uncompleted_tasks'
-      @tasks = @current_user.tasks.select { |task| !task.completed }
-    when 'completed_tasks'
-      @tasks = @current_user.tasks.select { |task| task.completed }
-    else
-      @tasks = @current_user.tasks
-    end
-
-    render json: @tasks, status: :ok
+    tasks = ::ListTasksService.new(filter: params[:filter], user: @current_user).call
+    render json: tasks, status: :ok
   end
 
   def show
-    @task = Task.find(params[:id])
-    render json: @task, status: :ok
+    render json: ::ShowTaskService.new(id: params[:id]).call, status: :ok
   rescue ActiveRecord::RecordNotFound
     render json: { error: "Task ##{params[:id]} not found" }, status: :not_found
   end
 
   def create
-    @task = Task.new(task_params.merge(user: @current_user))
-
-    if @task.save
-      render json: @task, status: :ok
-    else
-      render json: { errors: @task.errors }, status: :unprocessable_entity
-    end
+    new_task = ::CreateTaskService.new(params: task_params.merge(user: @current_user)).call
+    render json: new_task, status: :created
+  rescue StandardError => error
+    render json: { errors: error.message }, status: :unprocessable_entity
   end
 
   def update
-    @task = Task.find(params[:id])
-
-    if @task.update(task_params)
-      render json: @task, status: :ok
-    else
-      render json: @task.errors, status: :unprocessable_entity
-    end
+    task = ::UpdateTaskService.new(params: task_params, id: params[:id]).call
+    render json: task, status: :ok
+  rescue StandardError => error
+    render json: { errors: error.message }, status: :unprocessable_entity
   end
 
   def destroy
-    @task = Task.find(params[:id])
-    @task.destroy
-    render json: { message: "Task ##{params[:id]} destroyed." }, status: :ok
+    render json: ::DeleteTaskService.new(id: params[:id]).call, status: :ok
   rescue ActiveRecord::RecordNotFound
     render json: { error: "Task ##{params[:id]} not found" }, status: :not_found
   end
