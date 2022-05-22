@@ -2,13 +2,9 @@ class UsersController < ApplicationController
   before_action :authorize, except: :create
 
   def create
-    @user = User.new(user_params)
-
-    if @user.save
-      render json: @user, status: :created
-    else
-      render json: { errors: @user.errors }, status: :unprocessable_entity
-    end
+    render json: ::CreateUserService.new(params: user_params).call, status: :created
+  rescue StandardError => error
+    render json: { errors: error.message }, status: :unprocessable_entity
   end
 
   private

@@ -34,8 +34,7 @@ describe UsersController, type: :controller do
           expect { subject }.to change { User.count } .by(0)
           expect(response).to have_http_status(:unprocessable_entity)
           expect(result).to have_key('errors')
-          expect(result['errors']).to have_key('email')
-          expect(result['errors']['email'].first).to eq('is invalid')
+          expect(result['errors']).to eq('Validation failed: Email is invalid')
         end
       end
 
@@ -51,8 +50,7 @@ describe UsersController, type: :controller do
           expect { subject }.to change { User.count } .by(0)
           expect(response).to have_http_status(:unprocessable_entity)
           expect(result).to have_key('errors')
-          expect(result['errors']).to have_key('password')
-          expect(result['errors']['password'].first).to eq('is too short (minimum is 6 characters)')
+          expect(result['errors']).to eq('Validation failed: Password is too short (minimum is 6 characters), Email is invalid')
         end
       end
     end
