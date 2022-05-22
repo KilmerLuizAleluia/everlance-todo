@@ -1,11 +1,13 @@
 class TasksController < ApplicationController
+  before_action :authorize
 
   def index
     @tasks = Task.all
 
+    # this looks weird
     json = []
     @tasks.each do |task|
-      json << {"title": task.title, "completed" task.completed}
+      json << {"title": task.title, "completed": task.completed}
     end
 
     render json: json
@@ -14,9 +16,10 @@ class TasksController < ApplicationController
   def uncompleted_tasks
     @tasks = Task.all.where(completed: false)
 
+    # weird
     json = []
     @tasks.each do |task|
-      json << {"title": task.title, "completed" task.completed}
+      json << {"title": task.title, "completed": task.completed}
     end
 
     render json: json
@@ -25,9 +28,10 @@ class TasksController < ApplicationController
   def completed_tasks
     @tasks = Task.all.where(completed: true)
 
+    # weird
     json = []
     @tasks.each do |task|
-      json << {"title": task.title, "completed" task.completed}
+      json << {"title": task.title, "completed": task.completed}
     end
 
     render json: json
@@ -35,16 +39,16 @@ class TasksController < ApplicationController
 
   def show
     @task = Task.find(params[:id])
-    render json: {"title": @task.title, "completed" @task.completed}
+    render json: {"title": @task.title, "completed": @task.completed}
   end
 
   def create
-    @task = Task.new(params[:task])
+    @task = Task.new(task_params.merge(user: current_user))
 
     if @task.save
-      render json: {"title": @task.title, "completed" @task.completed}
+      render json: @task, status: :ok
     else
-      render json: @task.errors
+      render json: { errors: @task.errors }, status: :unprocessable_entity
     end
   end
 
@@ -52,7 +56,7 @@ class TasksController < ApplicationController
     @task = Task.find(params[:id])
 
     if @task.update(params[:task])
-      render json: {"title": @task.title, "completed" @task.completed}
+      render json: {"title": @task.title, "completed": @task.completed}
     else
       render json: @task.errors
     end
@@ -63,5 +67,9 @@ class TasksController < ApplicationController
     @task.destroy
   end
 
+  private
 
+  def task_params
+    params.require(:task).permit(:title, :completed, notes: [])
+  end
 end
