@@ -32,6 +32,27 @@ describe TasksController, type: :controller do
 
         expect(user.reload.tasks.size).to eq(1)
       end
+
+      context 'adding without notes' do
+        let(:params) do
+          {
+            task: {
+              title: 'Task Great Title',
+              completed: true,
+            }
+          }
+        end
+
+        it 'should create task' do
+          session[:user_id] = user.id
+          subject
+
+          task = Task.last
+          expect(task.title).to eq('Task Great Title')
+          expect(task.completed).to eq(true)
+          expect(task.notes).to eq([])
+        end
+      end
     end
 
     context 'when user is not logged in' do
