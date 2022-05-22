@@ -4,11 +4,11 @@ class TasksController < ApplicationController
   def index
     case params[:filter]
     when 'uncompleted_tasks'
-      @tasks = current_user.tasks.select { |task| !task.completed }
+      @tasks = @current_user.tasks.select { |task| !task.completed }
     when 'completed_tasks'
-      @tasks = current_user.tasks.select { |task| task.completed }
+      @tasks = @current_user.tasks.select { |task| task.completed }
     else
-      @tasks = current_user.tasks
+      @tasks = @current_user.tasks
     end
 
     render json: @tasks, status: :ok
@@ -17,10 +17,12 @@ class TasksController < ApplicationController
   def show
     @task = Task.find(params[:id])
     render json: @task, status: :ok
+  rescue ActiveRecord::RecordNotFound
+    render json: { error: "Task ##{params[:id]} not found" }, status: :not_found
   end
 
   def create
-    @task = Task.new(task_params.merge(user: current_user))
+    @task = Task.new(task_params.merge(user: @current_user))
 
     if @task.save
       render json: @task, status: :ok

@@ -1,17 +1,11 @@
 class UsersController < ApplicationController
-  before_action :authorize, except: [:create]
-
-  def show
-    @user = User.find(user_params)
-    render json: @user, status: :ok
-  end
+  before_action :authorize, except: :create
 
   def create
     @user = User.new(user_params)
 
     if @user.save
-      sign_in
-      render json: @user, status: :ok
+      render json: @user, status: :created
     else
       render json: { errors: @user.errors }, status: :unprocessable_entity
     end

@@ -18,8 +18,11 @@ describe TasksController, type: :controller do
     end
 
     context 'when user is logged in' do
+      before do
+        request.headers["Authorization"] = JwtHelper.encode(user_id: user.id)
+      end
+
       it 'should create task' do
-        session[:user_id] = user.id
         expect { subject }.to change { Task.count } .by(1)
 
         task = Task.last
@@ -44,7 +47,6 @@ describe TasksController, type: :controller do
         end
 
         it 'should create task' do
-          session[:user_id] = user.id
           subject
 
           task = Task.last
@@ -80,8 +82,11 @@ describe TasksController, type: :controller do
     end
 
     context 'when user is logged in' do
+      before do
+        request.headers["Authorization"] = JwtHelper.encode(user_id: user.id)
+      end
+
       it 'should update existing task' do
-        session[:user_id] = user.id
         subject
 
         expect(response).to have_http_status(:success)
@@ -108,10 +113,12 @@ describe TasksController, type: :controller do
 
     context 'when user is logged in' do
       let(:user) { create(:user) }
+      before do
+        request.headers["Authorization"] = JwtHelper.encode(user_id: user.id)
+      end
 
       context 'trying to delete existing task' do
         it 'shoudl delete' do
-          session[:user_id] = user.id
           expect { subject }.to change { Task.count } .by(-1)
           expect(response).to have_http_status(:ok)
           expect(result['message']).to eq("Task ##{task_id} destroyed.")
@@ -122,7 +129,6 @@ describe TasksController, type: :controller do
         let!(:task_id) { 50000 }
 
         it 'shoudl return not_found' do
-          session[:user_id] = user.id
           expect { subject }.to change { Task.count } .by(0)
           expect(response).to have_http_status(:not_found)
           expect(result['error']).to eq("Task ##{task_id} not found")
@@ -144,10 +150,13 @@ describe TasksController, type: :controller do
     let(:user) { create(:user) }
 
     context 'when user is not logged in' do
+      before do
+        request.headers["Authorization"] = JwtHelper.encode(user_id: user.id)
+      end
+
       context 'no filter params' do
         context 'when there is no tasks' do
           it 'should return unauthorized' do
-            session[:user_id] = user.id
             subject
             expect(response).to have_http_status(:ok)
             expect(result).to eq([])
@@ -162,7 +171,6 @@ describe TasksController, type: :controller do
           end
 
           it 'should return all taks' do
-            session[:user_id] = user.id
             subject
             expect(response).to have_http_status(:ok)
             expect(result.size).to eq(10)
@@ -182,7 +190,6 @@ describe TasksController, type: :controller do
         end
 
         it 'should return all taks' do
-          session[:user_id] = user.id
           subject
           expect(response).to have_http_status(:ok)
           expect(result.size).to eq(5)
@@ -201,7 +208,6 @@ describe TasksController, type: :controller do
         end
 
         it 'should return all taks' do
-          session[:user_id] = user.id
           subject
           expect(response).to have_http_status(:ok)
           expect(result.size).to eq(9)
@@ -210,6 +216,7 @@ describe TasksController, type: :controller do
 
       context 'when there is tasks from multiple users' do
         before do
+          request.headers["Authorization"] = JwtHelper.encode(user_id: user2.id)
           5.times do
             Task.create(user_id: user.id, completed: true)
           end
@@ -217,7 +224,6 @@ describe TasksController, type: :controller do
         let(:user2) { create(:user) }
 
         it 'should not be able to see othter user tasks' do
-          session[:user_id] = user2.id
           subject
           expect(response).to have_http_status(:ok)
           expect(result.size).to eq(0)
@@ -238,9 +244,12 @@ describe TasksController, type: :controller do
     let(:task) { create(:task, title: 'First Title', completed: true, notes: ['note1', 'note2']) }
     let(:user) { create(:user) }
 
-    context 'when user not logged in' do
+    context 'when user is logged in' do
+      before do
+        request.headers["Authorization"] = JwtHelper.encode(user_id: user.id)
+      end
+
       it 'should return task data' do
-        session[:user_id] = user.id
         subject
         expect(response).to have_http_status(:ok)
         expect(result['title']).to eq('First Title')

@@ -1,9 +1,14 @@
 class ApplicationController < ActionController::API
-  include SessionsHelper
-
   def authorize
-    unless logged_in?
-      render json: { message: 'should log in first' }, status: :unauthorized
+    header = request.headers['Authorization']
+    header = header.split(' ').last if header
+    begin
+      @decoded = JwtHelper.decode(header)
+      @current_user = User.find(@decoded[:user_id])
+    rescue ActiveRecord::RecordNotFound => e
+      render json: { errors: e.message }, status: :unauthorized
+    rescue JWT::DecodeError => e
+      render json: { errors: e.message }, status: :unauthorized
     end
   end
 end

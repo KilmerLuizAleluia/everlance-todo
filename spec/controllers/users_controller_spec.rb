@@ -16,15 +16,8 @@ describe UsersController, type: :controller do
 
       it 'should create user' do
         expect { subject }.to change { User.count } .by(1)
-        expect(response).to have_http_status(:success)
-        expect(session['user_id']).to eq(result['id'])
+        expect(response).to have_http_status(:created)
         expect(result['email']).to eq(params[:email])
-      end
-
-      it 'should login' do
-        subject
-        expect(controller.logged_in?).to be_truthy
-        expect(controller.current_user).to eq(User.find(result['id']))
       end
     end
 

@@ -1,7 +1,6 @@
 Rails.application.routes.draw do
-  resources :users, only: [:create, :show]
+  resources :users, only: :create
   resources :tasks
 
-  post   'sign_in'   => 'sessions#create'
-  delete 'sign_out'  => 'sessions#destroy'
+  post '/auth/login', to: 'authentication#login'
 end

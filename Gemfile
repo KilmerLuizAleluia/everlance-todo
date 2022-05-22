@@ -10,6 +10,7 @@ gem 'rails', '~> 5.0.3'
 gem 'sqlite3', '1.3.13'
 gem 'puma', '~> 3.0'
 gem 'bcrypt', '~> 3.1.7'
+gem 'jwt'
 
 group :development, :test do
   gem 'byebug', platform: :mri
