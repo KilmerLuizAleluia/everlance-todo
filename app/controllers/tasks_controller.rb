@@ -2,39 +2,16 @@ class TasksController < ApplicationController
   before_action :authorize
 
   def index
-    @tasks = Task.all
-
-    # this looks weird
-    json = []
-    @tasks.each do |task|
-      json << {"title": task.title, "completed": task.completed}
+    case params[:filter]
+    when 'uncompleted_tasks'
+      @tasks = current_user.tasks.select { |task| !task.completed }
+    when 'completed_tasks'
+      @tasks = current_user.tasks.select { |task| task.completed }
+    else
+      @tasks = current_user.tasks
     end
 
-    render json: json
-  end
-
-  def uncompleted_tasks
-    @tasks = Task.all.where(completed: false)
-
-    # weird
-    json = []
-    @tasks.each do |task|
-      json << {"title": task.title, "completed": task.completed}
-    end
-
-    render json: json
-  end
-
-  def completed_tasks
-    @tasks = Task.all.where(completed: true)
-
-    # weird
-    json = []
-    @tasks.each do |task|
-      json << {"title": task.title, "completed": task.completed}
-    end
-
-    render json: json
+    render json: @tasks, status: :ok
   end
 
   def show

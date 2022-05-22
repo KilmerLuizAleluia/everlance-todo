@@ -137,4 +137,99 @@ describe TasksController, type: :controller do
       end
     end
   end
+
+  describe 'GET #index' do
+    subject { get(:index, params: params, format: :json) }
+    let(:params) { {} }
+    let(:user) { create(:user) }
+
+    context 'when user is not logged in' do
+      context 'no filter params' do
+        context 'when there is no tasks' do
+          it 'should return unauthorized' do
+            session[:user_id] = user.id
+            subject
+            expect(response).to have_http_status(:ok)
+            expect(result).to eq([])
+          end
+        end
+
+        context 'when there is multiple tasks' do
+          before do
+            10.times do
+              Task.create(user_id: user.id)
+            end
+          end
+
+          it 'should return all taks' do
+            session[:user_id] = user.id
+            subject
+            expect(response).to have_http_status(:ok)
+            expect(result.size).to eq(10)
+          end
+        end
+      end
+
+      context 'with uncompleted_tasks params' do
+        let(:params) { { filter: 'uncompleted_tasks' } }
+        before do
+          7.times do
+            Task.create(user_id: user.id, completed: true)
+          end
+          5.times do
+            Task.create(user_id: user.id, completed: false)
+          end
+        end
+
+        it 'should return all taks' do
+          session[:user_id] = user.id
+          subject
+          expect(response).to have_http_status(:ok)
+          expect(result.size).to eq(5)
+        end
+      end
+
+      context 'with completed_tasks params' do
+        let(:params) { { filter: 'completed_tasks' } }
+        before do
+          9.times do
+            Task.create(user_id: user.id, completed: true)
+          end
+          3.times do
+            Task.create(user_id: user.id, completed: false)
+          end
+        end
+
+        it 'should return all taks' do
+          session[:user_id] = user.id
+          subject
+          expect(response).to have_http_status(:ok)
+          expect(result.size).to eq(9)
+        end
+      end
+
+      context 'when there is tasks from multiple users' do
+        before do
+          5.times do
+            Task.create(user_id: user.id, completed: true)
+          end
+        end
+        let(:user2) { create(:user) }
+
+        it 'should not be able to see othter user tasks' do
+          session[:user_id] = user2.id
+          subject
+          expect(response).to have_http_status(:ok)
+          expect(result.size).to eq(0)
+        end
+      end
+    end
+
+    context 'when user is not logged in' do
+      it 'should return unauthorized' do
+        subject
+        expect(response).to have_http_status(:unauthorized)
+      end
+    end
+  end
 end
